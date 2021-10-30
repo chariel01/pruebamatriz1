@@ -1,0 +1,122 @@
+
+from random import choice #importar numeros random 
+def valor_en_fila(red, fila, valor):
+    
+    #función identificar un valor en la fila
+   
+    return valor in red[fila]
+def valor_en_columna(red, col, valor):
+     #función identificar un valor en la columna
+    return valor in (fila[col] for fila in red)
+def valor_en_celda(red, fila, col, valor):
+      #función identificar un valor en la celda
+    # Obtener la caja a la que pertenece el número.
+    celda_fila, celda_col = celda_by_pos(fila, col)
+    # Construir una lista con los números en la caja.
+   valor_en_celda = unpack(
+        fila[celda_col*3:celda_col*3 + 3]
+        for fila in red[celda_fila*3:celda_fila*3 + 3]
+    )
+    return valor in valor_en_celda
+     #definir valor el valor en la celda 
+
+def reduce(n):
+    """
+    Reducir la posición 9x9 a 3x3. 
+    """
+    n /= 3
+    if n == 0 or n != int(n):
+        n += 1
+    return int(n)
+def celda_by_pos(fila, col):
+    # Trabajar temporalmente con base 1.
+    fila += 1
+    col += 1
+    # Obtener base 0 nuevamente.
+    return reduce(fila) - 1, reduce(col) - 1
+def unpack(iterable):
+    
+    for item in iterable:
+        yield from item
+def get_possible_numbers(red, fila, col):
+    """
+    Retorna números posibles para una determinada posición.
+    """
+    for valor in range(1, 10):
+        if (not valor_en_fila(red, fila, valor) and
+            not valor_en_columna(red, col, valor) and
+            not valor_en_celda(red, fila, col, valor)):
+            yield valor
+def main():
+    while True:
+        # Los ceros representan las celdas vacias.
+        red = [
+            [0, 0, 0, 1, 0, 0, 7, 0, 0],
+            [0, 5, 0, 0, 9, 0, 0, 0, 0],
+            [0, 0, 6, 7, 0, 0, 9, 0, 0],
+            [4, 0, 0, 8, 0, 0, 0, 0, 0],
+            [0, 2, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 9, 0, 0, 0],
+            [0, 0, 4, 0, 0, 7, 3, 0, 0],
+            [7, 3, 0, 0, 2, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+        
+        s = \
+        """\
+        +-----------------------+
+        | {} {} {} | {} {} {} | {} {} {} |
+        | {} {} {} | {} {} {} | {} {} {} |
+        | {} {} {} | {} {} {} | {} {} {} |
+        +-----------------------+
+        | {} {} {} | {} {} {} | {} {} {} |
+        | {} {} {} | {} {} {} | {} {} {} |
+        | {} {} {} | {} {} {} | {} {} {} |
+        +-----------------------+
+        | {} {} {} | {} {} {} | {} {} {} |
+        | {} {} {} | {} {} {} | {} {} {} |
+        | {} {} {} | {} {} {} | {} {} {} |
+        +-----------------------+
+        """
+        
+        while True:
+            possible_numbers = {
+                (fila, col): None for fila in range(9) for col in range(9)
+            }
+            
+            # Obtener una lista de números posibles para cada una de 
+            # las posiciones vacías.
+            for fila in range(9):
+                for col in range(9):
+                    valor = red[fila][col]
+                    if valor == 0:
+                        options = list(
+                            get_possible_numbers(red, fila, col)
+                        )
+                        if options:
+                            possible_numbers[(fila, col)] = options
+            
+            # Remover valores vacíos y ordenar por la cantidad de 
+            # posibilidades.
+            possible_numbers = sorted(
+                (
+                    (k, v)
+                    for (k, v) in possible_numbers.items()
+                    if v is not None
+                ),
+                key=lambda kv: len(kv[1])
+            )
+            
+            if possible_numbers:
+                (fila, col), valores = possible_numbers[0]
+                
+                red[fila][col] = choice(valores)
+            else:
+                break
+        
+        # Si cumple con los criterios ¡Eureka!
+        if 0 not in unpack(red):
+            print(s.format(*(unpack(red))))
+            break
+if __name__ == "__main__":
+    main()
